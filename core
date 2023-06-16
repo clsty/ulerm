@@ -379,7 +379,7 @@ echo "${deps_touchscr_list[@]}"| grep -wq "$(trycat .tempconf/deps_touchscr)" ||
 
 # {{{ 安装所选依赖 - Install selected dependencies
 case $instdeps in "y")
-deps_basic
+deps_begin
 deps_vga       $(trycat .tempconf/deps_vga)
 deps_audio     $(trycat .tempconf/deps_audio)
 deps_network   $(trycat .tempconf/deps_network)
