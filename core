@@ -14,7 +14,7 @@ project="https://github.com/clsty/ulerm"
 set -e
 ## 定义函数 - Define Functions
 function trycat { if test -f $1;then cat $1;fi; }
-function catlocale { trycat .tempconf/locale.conf; }
+function catlocale { trycat ${basedir}/.tempconf/locale.conf; }
 function nofail { while true;do if "$@";then break;fi;done; }
 function try { $@ || sleep 0; }
 
@@ -49,9 +49,9 @@ if ! test -f ../ready-ulerm; then
   mkdir ulerm
   find -maxdepth 1 -not -name ulerm -not -name . -exec mv {} ./ulerm/ \;
   echo '#!/bin/bash
-  exec "$(dirname $0)"/ulerm/core' > ./ready-ulerm
+  exec "$(dirname $0)"/ulerm/core "$@"' > ./ready-ulerm
   chmod +x ./ready-ulerm
-  exec ./ulerm/core ; exit
+  exec ./ulerm/core "$@"; exit
 else
   if [ "$basedirname" != "ulerm" ]; then
   echo -e "${cCT}The directory containing this script is ${cNT}\"$basedirname\"${cCT}. Please rename it to ${cNT}\"ulerm\"${cCT} manually (this script can't do it automatically for now).${cNM}"
