@@ -36,11 +36,6 @@ basedir="$(pwd)"
 basedirname="$(basename $basedir)"
 mkdir -p .tempconf
 
-echo 1$selfpath
-echo 2$basedirshort
-echo 3$basedir
-echo 4$basedirname
-exit
 # 判断发行版 id - Determine Linux Distro id
 if ! [ -n "${distro_id}" ];then distro_id="$(lsb_release -is)";fi
 case "$distro_id" in
@@ -419,10 +414,10 @@ fi
 known=y; echo "${uccr_list[@]}"| grep -wq "$(trycat .tempconf/uccr)" || known=n
 if [ $known = y ] ;then
   case $prepareuccr in
-    ""|"d") if [ ! -d "../uccr/" ];then uccr_prepare $uccr $uccr-id;fi ;;
+    ""|"d") if [ ! -d "../uccr/" ];then uccr_prepare $uccr $uccrid;fi ;;
     "m") if [ -d "../uccr/" ];then mv ../uccr ../uccr-old-$(date);fi
-    uccr_prepare $uccr $uccr-id ;;
-    "u") uccr_prepare $uccr $uccr-id ;;
+    uccr_prepare $uccr $uccrid ;;
+    "u") uccr_prepare $uccr $uccrid ;;
   esac
 else
   case "$dplang" in
