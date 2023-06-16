@@ -161,7 +161,7 @@ eval set -- "$para"
 while true ; do
   case "$1" in
     # 第一阶段已处理的 - Already processed in phase 1
-    -r|--reset) shift;;
+    -R|--reset) shift;;
     # 简单的 - Simple ones
     -a|--ascii) touch .tempconf/ascii;shift;;
     --dryrun)   dryrun=y;shift;; # 供调试使用
@@ -250,9 +250,11 @@ warn_entering_num(){
 
 # {{{ 初次安装时 - For first time installation
 if ! test -f .tempconf/installed; then
-  if ! [ -n ${askow} ];then askow=y;fi
-  if ! [ -n ${instdeps} ];then instdeps=y;fi
+  if ! [ -n ${askow} ];then askow=y;else askow=n;fi
+  if ! [ -n ${instdeps} ];then instdeps=y;else instdeps=n;fi
 fi
+echo $instdeps>.tempconf/instdeps
+echo $askow>.tempconf/askow
 # }}}
 
 # {{{ 预设依赖（声卡） - deps preset (audio)
