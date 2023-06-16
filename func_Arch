@@ -6,7 +6,7 @@
 # notice that some of them comes from ./core, will occupy original functions, so that they should keep same as the ones in ./core.
 function nofail { while true;do if "$@";then break;fi;done; }
 function g { nofail git clone --filter=blob:none "$1" ../uccr; }
-function try { $@ || sleep 0; }
+function try { "$@" || sleep 0; }
 function trycat { if test -f $1;then cat $1;fi; }
 function catlocale { trycat .tempconf/locale.conf; }
 
