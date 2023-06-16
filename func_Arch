@@ -43,7 +43,7 @@ deps_audio(){
     pr pulseaudio-alsa
     try p lib32-pipewire lib32-pipewire-jack
     sd pulseaudio.service
-    ue pipewire-pulse.service;;
+    ue pipewire-pulse.service
     "pulseaudio") p pulseaudio ;;
     *) echo -e "ERROR: deps_audio \"$1\" not supported.";;
   esac
