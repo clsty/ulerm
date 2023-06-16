@@ -411,8 +411,8 @@ fi
 # }}}
 
 # {{{ 准备 UCCR - Prepare UCCR
-uccr="$(trycat ./tempconf/uccr)"
-uccrid="$(trycat ./tempconf/uccrid)"
+uccr="$(trycat .tempconf/uccr)"
+uccrid="$(trycat .tempconf/uccrid)"
 known=y; echo "${uccr_list[@]}"| grep -wq "$(trycat .tempconf/uccr)" || known=n
 if [ $known = y ] ;then
   case $prepareuccr in
