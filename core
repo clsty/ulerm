@@ -35,6 +35,12 @@ cd "${basedirshort}"
 basedir="$(pwd)"
 basedirname="$(basename $basedir)"
 mkdir -p .tempconf
+
+echo 1$selfpath
+echo 2$basedirshort
+echo 3$basedir
+echo 4$basedirname
+exit
 # 判断发行版 id - Determine Linux Distro id
 if ! [ -n "${distro_id}" ];then distro_id="$(lsb_release -is)";fi
 case "$distro_id" in

@@ -6,7 +6,7 @@ function nofail { while true;do if "$@";then break;fi;done; }
 function g { nofail git clone --filter=blob:none "$1" ../uccr; }
 function try { $@ || sleep 0; }
 function trycat { if test -f $1;then cat $1;fi; }
-function catlocale { trycat .tempconf/genv-locale.conf; }
+function catlocale { trycat .tempconf/locale.conf; }
 
 function y { nofail yay -S --needed --noconfirm $1; }
 function p { nofail sudo pacman -S --needed --noconfirm $1; }
