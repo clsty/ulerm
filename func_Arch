@@ -1,0 +1,155 @@
+#!/bin/bash
+# vim:fileencoding=utf-8:ft=config:fdm=marker foldlevel=0
+
+# {{{ 定义基本函数 - Define basic functions
+function nofail { while true;do if "$@";then break;fi;done; }
+function g { nofail git clone --filter=blob:none "$1" ../uccr; }
+function try { $@ || sleep 0; }
+function trycat { if test -f $1;then cat $1;fi; }
+function catlocale { trycat .tempconf/genv-locale.conf; }
+
+function y { nofail yay -S --needed --noconfirm $1; }
+function p { nofail sudo pacman -S --needed --noconfirm $1; }
+function pr { try sudo pacman -R --noconfirm $1; }
+function se { try sudo systemctl enable --now $1; }
+function ue { try systemctl enable --now --user $1; }
+function sd { try sudo systemctl disable --now $1; }
+function ud { try systemctl disable --now --user $1; }
+# }}}
+
+# {{{ deps_begin
+deps_begin(){
+## 确保有 AUR 助手 - Ensure AUR helper available
+if test -f "/usr/bin/yay";
+then echo "/usr/bin/yay found."
+else echo "/usr/bin/yay not found, now install yay:"
+  t=~/.cache/yay/; mkdir -p $t; cd $t
+  p git base-devel curl
+  nofail git clone https://aur.archlinux.org/yay-bin.git
+  cd yay-bin
+  nofail makepkg -si --noconfirm
+fi
+}
+# }}}
+# TODO：对每个list前面添加一个描述函数
+# {{{ deps_audio
+deps_audio_list=(none pipewire pulseaudio)
+deps_audio(){
+  case "$1" in
+    "none") sleep 0 ;;
+    "pipewire") p pipewire pipewire-audio pipewire-alsa pipewire-pulse wireplumber pipewire-jack pipewire-v4l2
+    pr pulseaudio-alsa
+    try p lib32-pipewire lib32-pipewire-jack
+    sd pulseaudio.service
+    ue pipewire-pulse.service;;
+    "pulseaudio") p pulseaudio ;;
+    *) echo -e "ERROR: deps_audio \"$1\" not supported.";;
+  esac
+}
+# }}}
+
+# {{{ deps_vga
+deps_vga_list=(none generic amd amd-ati nv nv-nouveau nv-old intel-IG)
+#TODO List:
+#Qemu/KVM/libvirt
+#VirtualBox
+#VMWARE
+# 自动判断并使用 multilib（而不是直接使用）
+deps_vga(){
+  case "$1" in
+    "none") sleep 0 ;;
+    "generic") p mesa
+    try p lib32-mesa ;;
+    # AMD
+    "amd") p mesa xf86-video-amdgpu vulkan-radeon
+    try p lib32-mesa lib32-vulkan-radeon ;;
+    "amd-ati") p mesa xf86-video-ati
+    try p lib32-mesa ;;
+    # Nvidia
+    "nv") p nvidia nvidia-settings
+    try p lib32-nvidia-utils ;;
+    "nv-nouveau") p mesa xf86-video-nouveau
+    try p lib32-mesa ;;
+    "nv-old") y nvidia-390xx-dkms nvidia-settings
+    try p lib32-nvidia-390xx-utils ;;
+    # Intel
+    "intel-IG") p mesa vulkan-intel
+    try p lib32-mesa lib32-vulkan-intel ;;
+    *) echo -e "ERROR: deps_vga \"$1\" not supported.";;
+  esac
+}
+# }}}
+# TODO：禁用冲突服务，如 iwd 等
+# {{{ deps_network
+deps_network_list=(none networkmanager)
+deps_network(){
+  case "$1" in
+    "none") sleep 0 ;;
+    "networkmanager") p networkmanager ;;
+    *) echo -e "ERROR: deps_network \"$1\" not supported.";;
+  esac
+}
+# }}}
+
+# {{{ deps_bluetooth
+deps_bluetooth_list=(none bluez)
+deps_bluetooth(){
+  case "$1" in
+    "none") sleep 0 ;;
+    "bluez") p bluez bluez-utils ;;
+    *) echo -e "ERROR: deps_bluetooth \"$1\" not supported.";;
+  esac
+}
+# }}}
+
+# {{{ deps_trackpad
+deps_trackpad_list=(none libinput synaptics)
+deps_trackpad(){
+  case "$1" in
+    "none") sleep 0 ;;
+    "libinput") p libinput xf86-input-libinput ;;
+    "synaptics") p xf86-input-synaptics ;;
+    *) echo -e "ERROR: deps_trackpad \"$1\" not supported.";;
+  esac
+}
+# }}}
+
+# {{{ deps_touchscr
+deps_touchscr_list=(none libinput evdev elographics)
+deps_touchscr(){
+  case "$1" in
+    "none") sleep 0 ;;
+    "libinput") p libinput xf86-input-libinput ;;
+    "evdev") p xf86-input-evdev;y xinput_calibrator ;;
+    "elographics") p xf86-input-elographic ;;
+    *) echo -e "ERROR: deps_touchscr \"$1\" not supported.";;
+  esac
+}
+# }}}
+
+# {{{ deps_end
+deps_end(){
+  sleep 0
+}
+# }}}
+# TODO 这里的函数应当
+# 1. 自行处理 $2 （来自 $uccrid），包括当它不符合标准时进行询问。
+# 2. 自行处理目录 ../uccr 已经存在时怎么办。注意，用户可以手动指定 --uccrpp=m 以自动尝试移动旧的 uccr，且对于 --uccrpp=d 来说，当 uccr 存在时也不会执行此函数，因此如果这里 ../uccr 还是存在，可以认为用户指定的是 --uccrpp=u ，所以应当进行 update 性质的操作，如 git pull
+# {{{ uccr_prepare
+uccr_list=(none archsway c-github c-git c-any)
+uccr_prepare(){
+  case "$1" in
+    "none") echo "specified uccr is \"none\", skipping" ;;
+    "archsway")
+    if [ -d ../uccr/ ] ; then
+      if [ -d ../uccr/.git/ ] ; then cd ../uccr;git pull;cd ${basedir};fi
+    else
+      g https://github.com/clsty 
+    fi ;;
+    "c-github") g https://github.com/$2 ;;
+    "c-git")    g $2 ;;
+    "c-any")    $2 ;;
+    *) echo -e "ERROR: uccr \"$1\" not supported.";;
+  esac
+}
+# }}}
