@@ -28,7 +28,7 @@ Technically, an uccr must meet 2 requirements:
 所以，这里有一个问题：为什么不直接使用 dotbot，而是将它变为 uccr 以配合 ulerm 再使用呢？
 换句话说，ulerm 提供了什么额外的好处？
 这里列举如下：
-- ulerm 提供了一个统一规范（文档正在编写）的基本设置流程，并将相关信息保存在 .tempconf 下，可供 uccr 读取。这些基本设置包括语言环境、硬件预设等。
+- ulerm 提供了一个统一规范（文档正在编写）的基本设置流程，并将相关信息保存在 .coreset 下，可供 uccr 读取。这些基本设置包括语言环境、硬件预设等。
   - 当一个 uccr 检测到用户采用了 zh_CN 作为语言环境，则它可以安装 zh_CN 相关的字体、输入法等（如果是不支持的语言，可以统一回退到 en_US）。
   - 当一个 uccr 检测到用户采用了 networkmanager 作为网络预设，则它可以安装配置 networkmanager 的 applet。
   - 若一个 hyprland 的 uccr 检测到用户使用了 nvidia 的显卡预设，它可以安装 hyprland-nvidia 而不是原版的 hyprland。
@@ -74,7 +74,7 @@ git clone https://github.com/clsty/generic-archsway ~/confrepo
 这样就完成了（可能需要重启系统）。
 
 #+begin_quote
-注：此脚本的行为是，首次安装时会提示选择什么语言，以及是否覆盖文件。之后每次运行均不再询问，除非删除 =.tempconf= 。
+注：此脚本的行为是，首次安装时会提示选择什么语言，以及是否覆盖文件。之后每次运行均不再询问，除非删除 =.coreset= 。
 #+end_quote
 
 *** 开始使用

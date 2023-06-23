@@ -14,7 +14,7 @@ project="https://github.com/clsty/ulerm"
 set -e
 ## 定义函数 - Define Functions
 function trycat { if test -f $1;then cat $1;fi; }
-function catlocale { trycat ${basedir}/.tempconf/locale.conf; }
+function catlocale { trycat ${basedir}/.coreset/locale; }
 function nofail { while true;do if "$@";then break;fi;done; }
 function try { $@ || sleep 0; }
 
@@ -34,7 +34,7 @@ basedirshort="$(dirname $selfpath)"
 cd "${basedirshort}"
 basedir="$(pwd)"
 basedirname="$(basename $basedir)"
-mkdir -p .tempconf
+mkdir -p .coreset
 
 # 判断发行版 id - Determine Linux Distro id
 if ! [ -n "${distro_id}" ];then distro_id="$(lsb_release -is)";fi
@@ -78,21 +78,22 @@ ${cNT}  -l, --lang=<lang>      ${cNM}选择语言环境，例如 --lang=zh_CN
 ${cNT}  -a, --ascii            ${cNM}ASCII 显示模式，强制以英文显示，即使其他语言已经通过 --lang 指定
 ${cNT}      --askow=y|n        ${cNM}在安装前提示(y)或不提示(n)确认覆盖信息（若不指定，则仅首次安装时提示）
 ${cNT}  -c                     ${cNM}相当于 --askow=y
-${cNT}  -R, --reset            ${cNM}重置模式（删除 .tempconf）
+${cNT}  -R, --reset            ${cNM}重置模式（删除 .coreset）
 
-${cNT}依赖预设${cNM}
+${cNT}基础环境预设${cNM}
+${cNT}  -b, --benv             ${cNM}安装基础环境（若不指定，则仅第一次时安装基础环境）
+${cNT}      --audio=<预设>     ${cNM}安装基础环境时，也安装指定声卡的<预设>。当前发行版可用的<预设>：${cHL}${benv_audio_list[@]}${cNM}
+${cNT}      --vga=<预设>       ${cNM}安装基础环境时，也安装指定显卡的<预设>。当前发行版可用的<预设>：${cHL}${benv_vga_list[@]}${cNM}
+${cNT}      --network=<预设>   ${cNM}安装基础环境时，也安装指定网卡的<预设>。当前发行版可用的<预设>：${cHL}${benv_network_list[@]}${cNM}
+${cNT}      --bluetooth=<预设> ${cNM}安装基础环境时，也安装指定蓝牙的<预设>。当前发行版可用的<预设>：${cHL}${benv_bluetooth_list[@]}${cNM}
+${cNT}      --trackpad=<预设>  ${cNM}安装基础环境时，也安装指定触控板的<预设>。当前发行版可用的<预设>：${cHL}${benv_trackpad_list[@]}${cNM}
+${cNT}      --touchscr=<预设>  ${cNM}安装基础环境时，也安装指定触摸屏的<预设>。当前发行版可用的<预设>：${cHL}${benv_touchscr_list[@]}${cNM}
+
+${cNT}UCCR 相关${cNM}
 ${cNT}  -d, --deps             ${cNM}安装依赖（若不指定，则仅第一次时安装依赖）
-${cNT}      --audio=<预设>     ${cNM}安装依赖时，也安装指定声卡的<预设>。当前发行版可用的<预设>：${cHL}${deps_audio_list[@]}${cNM}
-${cNT}      --vga=<预设>       ${cNM}安装依赖时，也安装指定显卡的<预设>。当前发行版可用的<预设>：${cHL}${deps_vga_list[@]}${cNM}
-${cNT}      --network=<预设>   ${cNM}安装依赖时，也安装指定网卡的<预设>。当前发行版可用的<预设>：${cHL}${deps_network_list[@]}${cNM}
-${cNT}      --bluetooth=<预设> ${cNM}安装依赖时，也安装指定蓝牙的<预设>。当前发行版可用的<预设>：${cHL}${deps_bluetooth_list[@]}${cNM}
-${cNT}      --trackpad=<预设>  ${cNM}安装依赖时，也安装指定触控板的<预设>。当前发行版可用的<预设>：${cHL}${deps_trackpad_list[@]}${cNM}
-${cNT}      --touchscr=<预设>  ${cNM}安装依赖时，也安装指定触摸屏的<预设>。当前发行版可用的<预设>：${cHL}${deps_touchscr_list[@]}${cNM}
-
-${cNT}uccr 相关${cNM}
-${cNT}      --uccr=<预设>      ${cNM}指定 uccr<预设>。当前发行版可用的<预设>：${cHL}${uccr_list[@]}${cNM}
-${cNT}      --uccrid=<值>      ${cNM}指定 uccrid 的值，格式要求与所指定的 uccr 有关。
-${cNT}      --uccrpp=d|m|u|n   ${cNM}指定 uccr 的准备策略。
+${cNT}      --uccr=<预设>      ${cNM}指定 UCCR <预设>。当前发行版可用的<预设>：${cHL}${uccr_list[@]}${cNM}
+${cNT}      --uccrid=<值>      ${cNM}指定 uccrid 的值，格式要求与所指定的 UCCR 有关。
+${cNT}      --uccrpp=d|m|u|n   ${cNM}指定 UCCR 的准备策略。
                                d 或 direct（默认）：当 ../uccr 存在时不进行准备。
                                m 或 move：当 ../uccr 存在时，将 ../uccr 重命名为 ../uccr-old-<时间> 再准备。
                                u 或 update：当 ../uccr 存在时对其进行升级。
@@ -112,21 +113,22 @@ ${cNT}  -l, --lang=<lang>  ${cNM}Select language environment, e.g. --lang=zh_CN
 ${cNT}  -a, --ascii        ${cNM}ASCII display mode, forcely display in English even if other language is specified with --lang
 ${cNT}      --askow=y|n    ${cNM}Prompt(y) or NOT prompt(n) for confirming overwriting information before installation (if not specified, then only prompt for first time installation)
 ${cNT}  -c                 ${cNM}Alias of --askow=y
-${cNT}  -R, --reset        ${cNM}Reset mode (delete .tempconf)
+${cNT}  -R, --reset        ${cNM}Reset mode (delete .coreset)
 
-${cNT}Dependencies Preset${cNM}
-${cNT}  -d, --deps         ${cNM}Install dependencies (if not specified, then only install for first time installation)
-${cNT}      --audio=<preset> ${cNM}Install audio <preset> when install dependencies. <preset> available for current distro: ${cHL}${deps_audio_list[@]}${cNM}
-${cNT}      --vga=<preset> ${cNM}Install vga <preset> when install dependencies. <preset> available for current distro: ${cHL}${deps_vga_list[@]}${cNM}
-${cNT}      --network=<preset> ${cNM}Install network <preset> when install dependencies. <preset> available for current distro: ${cHL}${deps_network_list[@]}${cNM}
-${cNT}      --bluetooth=<preset> ${cNM}Install bluetooth <preset> when install dependencies. <preset> available for current distro: ${cHL}${deps_bluetooth_list[@]}${cNM}
-${cNT}      --trackpad=<preset> ${cNM}Install trackpad <preset> when install dependencies. <preset> available for current distro: ${cHL}${deps_trackpad_list[@]}${cNM}
-${cNT}      --touchscr=<preset> ${cNM}Install touch-screen <preset> when install dependencies. <preset> available for current distro: ${cHL}${deps_touchscr_list[@]}${cNM}
+${cNT}Basic Environment Preset${cNM}
+${cNT}      --benv         ${cNM}Install basic environment (if not specified, then only install for first time installation)
+${cNT}      --audio=<preset> ${cNM}Install audio <preset> when install basic environment. <preset> available for current distro: ${cHL}${benv_audio_list[@]}${cNM}
+${cNT}      --vga=<preset> ${cNM}Install vga <preset> when install basic environment. <preset> available for current distro: ${cHL}${benv_vga_list[@]}${cNM}
+${cNT}      --network=<preset> ${cNM}Install network <preset> when install basic environment. <preset> available for current distro: ${cHL}${benv_network_list[@]}${cNM}
+${cNT}      --bluetooth=<preset> ${cNM}Install bluetooth <preset> when install basic environment. <preset> available for current distro: ${cHL}${benv_bluetooth_list[@]}${cNM}
+${cNT}      --trackpad=<preset> ${cNM}Install trackpad <preset> when install basic environment. <preset> available for current distro: ${cHL}${benv_trackpad_list[@]}${cNM}
+${cNT}      --touchscr=<preset> ${cNM}Install touch-screen <preset> when install basic environment. <preset> available for current distro: ${cHL}${benv_touchscr_list[@]}${cNM}
 
-${cNT}uccr related${cNM}
-${cNT}      --uccr=<preset>      ${cNM}指定 uccr<预设>。当前发行版可用的<预设>：${cHL}${uccr_list[@]}${cNM}
-${cNT}      --uccrid=<value>      ${cNM}The value of uccrid, the format depends on specified uccr.
-${cNT}      --uccrpp=d|m|u|n   ${cNM}The behavior of uccr preparation.
+${cNT}UCCR related${cNM}
+${cNT}  -d, --deps             ${cNM}Install dependencies (if not specified, then only install for first time installation)
+${cNT}      --uccr=<preset>      ${cNM}specify UCCR <preset>. Available <preset> for current distro：${cHL}${uccr_list[@]}${cNM}
+${cNT}      --uccrid=<value>      ${cNM}The value of uccrid, the format depends on specified UCCR.
+${cNT}      --uccrpp=d|m|u|n   ${cNM}The behavior of UCCR preparation.
                                d or direct (default): When ../uccr exists, do NOT prepare.
                                m or move: When ../uccr exists, rename ../uccr to ../uccr-old-<date> then prepare.
                                u or update: When ../uccr exists, try update it.
@@ -138,8 +140,8 @@ esac
 
 # {{{ getopt
 para=$(getopt \
-       -o Rahcld:q \
-       -l dryrun,reset,listow:,listcr:,ascii,help,lang:,askow:,deps,audio:,vga:,network:,bluetooth:,trackpad:,touchscr:,uccr:,uccrid:,uccrpp: \
+       -o Rabhcld:q \
+       -l dryrun,reset,listow:,listcr:,ascii,help,lang:,askow:,deps,benv,audio:,vga:,network:,bluetooth:,trackpad:,touchscr:,uccr:,uccrid:,uccrpp: \
        -n "$0" -- "$@")
 [ $? != 0 ] && echo "$0: Error when getopt, please recheck parameters." && exit 1
 ## getopt 第一阶段 - getopt Phase 1
@@ -151,7 +153,7 @@ while true ; do
     -h|--help) showhelp;exit;;
     --listow) listoverwrite $2;exit;;
     --listcr) listcreate $2;exit;;
-    -R|--reset) rm -rf .tempconf/*; shift ;;
+    -R|--reset) rm -rf .coreset/*; shift ;;
     --) break ;;
     *) shift ;;
   esac
@@ -163,18 +165,19 @@ while true ; do
     # 第一阶段已处理的 - Already processed in phase 1
     -R|--reset) shift;;
     # 简单的 - Simple ones
-    -a|--ascii) touch .tempconf/ascii;shift;;
+    -a|--ascii) touch .coreset/ascii;shift;;
     --dryrun)   dryrun=y;shift;; # 供调试使用
     -c)         askow=y;shift;;
-    # 依赖设定相关 - Dependencies settings
+    # 基础环境相关 - Dependencies settings
     -d|--deps)  instdeps=y;shift;;
-    --audio)    echo "$2">.tempconf/deps_audio;shift 2;;
-    --vga)      echo "$2">.tempconf/deps_vga;shift 2;;
-    --network)  echo "$2">.tempconf/deps_network;shift 2;;
-    --bluetooth)echo "$2">.tempconf/deps_bluetooth;shift 2;;
-    --trackpad) echo "$2">.tempconf/deps_trackpad;shift 2;;
-    --uccr)     echo "$2">.tempconf/uccr;shift 2;;
-    --uccrid)   echo "$2">.tempconf/uccrid;shift 2;;
+    -b|--benv)  instbenv=y;shift;;
+    --audio)    echo "$2">.coreset/benv_audio;shift 2;;
+    --vga)      echo "$2">.coreset/benv_vga;shift 2;;
+    --network)  echo "$2">.coreset/benv_network;shift 2;;
+    --bluetooth)echo "$2">.coreset/benv_bluetooth;shift 2;;
+    --trackpad) echo "$2">.coreset/benv_trackpad;shift 2;;
+    --uccr)     echo "$2">.coreset/uccr;shift 2;;
+    --uccrid)   echo "$2">.coreset/uccrid;shift 2;;
     # 复杂的 - Complex ones
     --askow)
     case $2 in
@@ -194,8 +197,8 @@ while true ; do
 
     -l|--lang)
     case $2 in
-      "zh_CN") echo zh_CN>.tempconf/locale.conf;;
-      "en_US") echo en_US>.tempconf/locale.conf;;
+      "zh_CN") echo zh_CN>.coreset/locale;;
+      "en_US") echo en_US>.coreset/locale;;
       "") echo -e "${cCT}No argument for --lang${cNM}";exit 1;;
       *) echo -e "${cCT}Wrong argument for --lang${cNM}";exit 1;;
     esac;shift 2;;
@@ -207,11 +210,11 @@ done
 # }}}
 
 # {{{ 显示语言与本地化 - Display language and Localization
-## 当 .tempconf/ascii 存在时，采用 ascii 显示模式（即英语），否则使用 unicode
-## When .tempconf/ascii exists, use ascii display mode(i.e. English only), else use unicode.
-if test -f .tempconf/ascii; then rm .tempconf/ascii;dplang=ascii;else dplang=unicode;fi
-## 仅当不存在符合标准的 locale.conf 时进行下一步的询问
-## Prompt next only when no standard locale.conf exists
+## 当 .coreset/ascii 存在时，采用 ascii 显示模式（即英语），否则使用 unicode
+## When .coreset/ascii exists, use ascii display mode(i.e. English only), else use unicode.
+if test -f .coreset/ascii; then rm .coreset/ascii;dplang=ascii;else dplang=unicode;fi
+## 仅当不存在符合标准的 locale 时进行下一步的询问
+## Prompt next only when no standard locale exists
 case "$(catlocale)" in
 "zh_CN"|"en_US") sleep 0 ;;
 *) while true;do
@@ -231,8 +234,8 @@ echo "
 esac
 read -p "Select a number: " p
 case $p in
-[1]) echo zh_CN > .tempconf/locale.conf ;break ;;
-[2]) echo en_US > .tempconf/locale.conf ;break ;;
+[1]) echo zh_CN > .coreset/locale ;break ;;
+[2]) echo en_US > .coreset/locale ;break ;;
 *) echo -e "Please enter the ${cCT}corresponding number${cNM}."
 esac 
 done ;; esac
@@ -249,173 +252,176 @@ warn_entering_num(){
 # }}}
 
 # {{{ 初次安装时 - For first time installation
-if ! test -f .tempconf/installed; then
+if ! test -f .coreset/installed; then
   if ! [ -n ${askow} ];then askow=y;else askow=n;fi
   if ! [ -n ${instdeps} ];then instdeps=y;else instdeps=n;fi
 fi
-echo $instdeps>.tempconf/instdeps
-echo $askow>.tempconf/askow
+echo $instdeps>.coreset/instdeps
+echo $askow>.coreset/askow
 # }}}
 
-# {{{ 预设依赖（声卡） - deps preset (audio)
-ask_deps_audio(){
+# {{{ 预设基础环境（声卡） - benv preset (audio)
+ask_benv_audio(){
 case $dplang in
-  "zh_CN") echo -e "请选择一个要安装的声卡依赖预设（输入一个对应的整数）。";;
-  "en_US") echo -e "Please specify a wanted audio deps preset (input the corresponding number).";;
+  "zh_CN") echo -e "请选择一个要安装的声卡基础环境预设（输入一个对应的整数）。";;
+  "en_US") echo -e "Please specify a wanted audio benv preset (input the corresponding number).";;
 esac
 while true;do
-  listnumprint "${deps_audio_list[*]}"
+  listnumprint "${benv_audio_list[*]}"
   read -p ": " n
   case $n in
-    [0-$((num-1))]) echo ${deps_audio_list[$n]} > .tempconf/deps_audio ;break ;;
+    [0-$((num-1))]) echo ${benv_audio_list[$n]} > .coreset/benv_audio ;break ;;
     *) warn_entering_num ;;
   esac
 done
 }
-# 仅当 .tempconf/deps_audio 的内容不在 $deps_audio_list 中时进行询问。
-# Prompt only when the content of .tempconf/deps_audio is NOT in the $deps_audio_list.
-echo "${deps_audio_list[@]}"| grep -wq "$(trycat .tempconf/deps_audio)" || ask_deps_audio
+# 仅当 .coreset/benv_audio 的内容不在 $benv_audio_list 中时进行询问。
+# Prompt only when the content of .coreset/benv_audio is NOT in the $benv_audio_list.
+echo "${benv_audio_list[@]}"| grep -wq "$(trycat .coreset/benv_audio)" || ask_benv_audio
 # }}}
 
-# {{{ 预设依赖（显卡） - deps preset (vga)
-ask_deps_vga(){
+# {{{ 预设基础环境（显卡） - benv preset (vga)
+ask_benv_vga(){
 case $dplang in
-  "zh_CN") echo -e "请选择一个要安装的显卡依赖预设（输入一个对应的整数）。";;
-  "en_US") echo -e "Please specify a wanted vga deps preset (input the corresponding number).";;
+  "zh_CN") echo -e "请选择一个要安装的显卡基础环境预设（输入一个对应的整数）。";;
+  "en_US") echo -e "Please specify a wanted vga benv preset (input the corresponding number).";;
 esac
 while true;do
-  listnumprint "${deps_vga_list[*]}"
+  listnumprint "${benv_vga_list[*]}"
   read -p ": " n
   case $n in
-    [0-$((num-1))]) echo ${deps_vga_list[$n]} > .tempconf/deps_vga ;break ;;
+    [0-$((num-1))]) echo ${benv_vga_list[$n]} > .coreset/benv_vga ;break ;;
     *) warn_entering_num ;;
   esac
 done
 }
-# 仅当 .tempconf/deps_vga 的内容不在 $deps_vga_list 中时进行询问。
-# Prompt only when the content of .tempconf/deps_vga is NOT in the $deps_vga_list.
-echo "${deps_vga_list[@]}"| grep -wq "$(trycat .tempconf/deps_vga)" || ask_deps_vga
+# 仅当 .coreset/benv_vga 的内容不在 $benv_vga_list 中时进行询问。
+# Prompt only when the content of .coreset/benv_vga is NOT in the $benv_vga_list.
+echo "${benv_vga_list[@]}"| grep -wq "$(trycat .coreset/benv_vga)" || ask_benv_vga
 # }}}
 
-# {{{ 预设依赖（网卡） - deps preset (network)
-ask_deps_network(){
+# {{{ 预设基础环境（网卡） - benv preset (network)
+ask_benv_network(){
 case $dplang in
-  "zh_CN") echo -e "请选择一个要安装的网卡依赖预设（输入一个对应的整数）。";;
-  "en_US") echo -e "Please specify a wanted network deps preset (input the corresponding number).";;
+  "zh_CN") echo -e "请选择一个要安装的网卡基础环境预设（输入一个对应的整数）。";;
+  "en_US") echo -e "Please specify a wanted network benv preset (input the corresponding number).";;
 esac
 while true;do
-  listnumprint "${deps_network_list[*]}"
+  listnumprint "${benv_network_list[*]}"
   read -p ": " n
   case $n in
-    [0-$((num-1))]) echo ${deps_network_list[$n]} > .tempconf/deps_network ;break ;;
+    [0-$((num-1))]) echo ${benv_network_list[$n]} > .coreset/benv_network ;break ;;
     *) warn_entering_num ;;
   esac
 done
 }
-# 仅当 .tempconf/deps_network 的内容不在 $deps_network_list 中时进行询问。
-# Prompt only when the content of .tempconf/deps_network is NOT in the $deps_network_list.
-echo "${deps_network_list[@]}"| grep -wq "$(trycat .tempconf/deps_network)" || ask_deps_network
+# 仅当 .coreset/benv_network 的内容不在 $benv_network_list 中时进行询问。
+# Prompt only when the content of .coreset/benv_network is NOT in the $benv_network_list.
+echo "${benv_network_list[@]}"| grep -wq "$(trycat .coreset/benv_network)" || ask_benv_network
 # }}}
 
-# {{{ 预设依赖（蓝牙） - deps preset (bluetooth)
-ask_deps_bluetooth(){
+# {{{ 预设基础环境（蓝牙） - benv preset (bluetooth)
+ask_benv_bluetooth(){
 case $dplang in
-  "zh_CN") echo -e "请选择一个要安装的蓝牙依赖预设（输入一个对应的整数）。";;
-  "en_US") echo -e "Please specify a wanted bluetooth deps preset (input the corresponding number).";;
+  "zh_CN") echo -e "请选择一个要安装的蓝牙基础环境预设（输入一个对应的整数）。";;
+  "en_US") echo -e "Please specify a wanted bluetooth benv preset (input the corresponding number).";;
 esac
 while true;do
-  listnumprint "${deps_bluetooth_list[*]}"
+  listnumprint "${benv_bluetooth_list[*]}"
   read -p ": " n
   case $n in
-    [0-$((num-1))]) echo ${deps_bluetooth_list[$n]} > .tempconf/deps_bluetooth ;break ;;
+    [0-$((num-1))]) echo ${benv_bluetooth_list[$n]} > .coreset/benv_bluetooth ;break ;;
     *) warn_entering_num ;;
   esac
 done
 }
-# 仅当 .tempconf/deps_bluetooth 的内容不在 $deps_bluetooth_list 中时进行询问。
-# Prompt only when the content of .tempconf/deps_bluetooth is NOT in the $deps_bluetooth_list.
-echo "${deps_bluetooth_list[@]}"| grep -wq "$(trycat .tempconf/deps_bluetooth)" || ask_deps_bluetooth
+# 仅当 .coreset/benv_bluetooth 的内容不在 $benv_bluetooth_list 中时进行询问。
+# Prompt only when the content of .coreset/benv_bluetooth is NOT in the $benv_bluetooth_list.
+echo "${benv_bluetooth_list[@]}"| grep -wq "$(trycat .coreset/benv_bluetooth)" || ask_benv_bluetooth
 # }}}
 
-# {{{ 预设依赖（触控板） - deps preset (trackpad)
-ask_deps_trackpad(){
+# {{{ 预设基础环境（触控板） - benv preset (trackpad)
+ask_benv_trackpad(){
 case $dplang in
-  "zh_CN") echo -e "请选择一个要安装的触控板依赖预设（输入一个对应的整数）。";;
-  "en_US") echo -e "Please specify a wanted trackpad deps preset (input the corresponding number).";;
+  "zh_CN") echo -e "请选择一个要安装的触控板基础环境预设（输入一个对应的整数）。";;
+  "en_US") echo -e "Please specify a wanted trackpad benv preset (input the corresponding number).";;
 esac
 while true;do
-  listnumprint "${deps_trackpad_list[*]}"
+  listnumprint "${benv_trackpad_list[*]}"
   read -p ": " n
   case $n in
-    [0-$((num-1))]) echo ${deps_trackpad_list[$n]} > .tempconf/deps_trackpad ;break ;;
+    [0-$((num-1))]) echo ${benv_trackpad_list[$n]} > .coreset/benv_trackpad ;break ;;
     *) warn_entering_num ;;
   esac
 done
 }
-# 仅当 .tempconf/deps_trackpad 的内容不在 $deps_trackpad_list 中时进行询问。
-# Prompt only when the content of .tempconf/deps_trackpad is NOT in the $deps_trackpad_list.
-echo "${deps_trackpad_list[@]}"| grep -wq "$(trycat .tempconf/deps_trackpad)" || ask_deps_trackpad
+# 仅当 .coreset/benv_trackpad 的内容不在 $benv_trackpad_list 中时进行询问。
+# Prompt only when the content of .coreset/benv_trackpad is NOT in the $benv_trackpad_list.
+echo "${benv_trackpad_list[@]}"| grep -wq "$(trycat .coreset/benv_trackpad)" || ask_benv_trackpad
 # }}}
 
-# {{{ 预设依赖（触摸屏） - deps preset (touchscr)
-ask_deps_touchscr(){
+# {{{ 预设基础环境（触摸屏） - benv preset (touchscr)
+ask_benv_touchscr(){
 case $dplang in
-  "zh_CN") echo -e "请选择一个要安装的触摸屏依赖预设（输入一个对应的整数）。";;
-  "en_US") echo -e "Please specify a wanted touchscr deps preset (input the corresponding number).";;
+  "zh_CN") echo -e "请选择一个要安装的触摸屏基础环境预设（输入一个对应的整数）。";;
+  "en_US") echo -e "Please specify a wanted touchscr benv preset (input the corresponding number).";;
 esac
 while true;do
-  listnumprint "${deps_touchscr_list[*]}"
+  listnumprint "${benv_touchscr_list[*]}"
   read -p ": " n
   case $n in
-    [0-$((num-1))]) echo ${deps_touchscr_list[$n]} > .tempconf/deps_touchscr ;break ;;
+    [0-$((num-1))]) echo ${benv_touchscr_list[$n]} > .coreset/benv_touchscr ;break ;;
     *) warn_entering_num ;;
   esac
 done
 }
-# 仅当 .tempconf/deps_touchscr 的内容不在 $deps_touchscr_list 中时进行询问。
-# Prompt only when the content of .tempconf/deps_touchscr is NOT in the $deps_touchscr_list.
-echo "${deps_touchscr_list[@]}"| grep -wq "$(trycat .tempconf/deps_touchscr)" || ask_deps_touchscr
+# 仅当 .coreset/benv_touchscr 的内容不在 $benv_touchscr_list 中时进行询问。
+# Prompt only when the content of .coreset/benv_touchscr is NOT in the $benv_touchscr_list.
+echo "${benv_touchscr_list[@]}"| grep -wq "$(trycat .coreset/benv_touchscr)" || ask_benv_touchscr
 # }}}
 
-# {{{ 安装所选依赖 - Install selected dependencies
-case $instdeps in "y")
-deps_begin
-deps_vga       $(trycat .tempconf/deps_vga)
-deps_audio     $(trycat .tempconf/deps_audio)
-deps_network   $(trycat .tempconf/deps_network)
-deps_bluetooth $(trycat .tempconf/deps_bluetooth)
-deps_trackpad  $(trycat .tempconf/deps_trackpad)
-deps_touchscr  $(trycat .tempconf/deps_touchscr)
-deps_end
+# {{{ 安装所选基础环境 - Install selected basic environment
+if ! test -f .coreset/installed; then
+  if ! [ -n ${instdeps} ];then instdeps=y;fi
+fi
+case $instbenv in "y")
+benv_begin
+benv_vga       $(trycat .coreset/benv_vga)
+benv_audio     $(trycat .coreset/benv_audio)
+benv_network   $(trycat .coreset/benv_network)
+benv_bluetooth $(trycat .coreset/benv_bluetooth)
+benv_trackpad  $(trycat .coreset/benv_trackpad)
+benv_touchscr  $(trycat .coreset/benv_touchscr)
+benv_end
 ;;esac
 # }}}
 
-# {{{ 选择 uccr - select uccr
+# {{{ 选择 UCCR - Select UCCR
 ask_uccr(){
 case $dplang in
-  "zh_CN") echo -e "请选择一个要安装的 uccr 预设（输入一个对应的整数）。";;
-  "en_US") echo -e "Please specify a wanted uccr preset (input the corresponding number).";;
+  "zh_CN") echo -e "请选择一个要安装的 UCCR 预设（输入一个对应的整数）。";;
+  "en_US") echo -e "Please specify a wanted UCCR preset (input the corresponding number).";;
 esac
 while true;do
   listnumprint "${uccr_list[*]}"
   read -p ": " n
   case $n in
-    [0-$((num-1))]) echo ${uccr_list[$n]} > .tempconf/uccr ;break ;;
+    [0-$((num-1))]) echo ${uccr_list[$n]} > .coreset/uccr ;break ;;
     *) warn_entering_num ;;
   esac
 done
 }
-# 仅当 ../uccr/uccr-sync 不存在，且 .tempconf/uccr 的内容不在 $uccr_list 中时进行询问。
-# Prompt only when ../uccr/uccr-sync does NOT exists and the content of .tempconf/uccr is NOT in the $uccr_list.
+# 仅当 ../uccr/uccr-sync 不存在，且 .coreset/uccr 的内容不在 $uccr_list 中时进行询问。
+# Prompt only when ../uccr/uccr-sync does NOT exists and the content of .coreset/uccr is NOT in the $uccr_list.
 if ! test -f ../uccr/uccr-sync;then
-  echo "${uccr_list[@]}"| grep -wq "$(trycat .tempconf/uccr)" || ask_uccr
+  echo "${uccr_list[@]}"| grep -wq "$(trycat .coreset/uccr)" || ask_uccr
 fi
 # }}}
 
 # {{{ 准备 UCCR - Prepare UCCR
-uccr="$(trycat .tempconf/uccr)"
-uccrid="$(trycat .tempconf/uccrid)"
-known=y; echo "${uccr_list[@]}"| grep -wq "$(trycat .tempconf/uccr)" || known=n
+uccr="$(trycat .coreset/uccr)"
+uccrid="$(trycat .coreset/uccrid)"
+known=y; echo "${uccr_list[@]}"| grep -wq "$(trycat .coreset/uccr)" || known=n
 if [ $known = y ] ;then
   case $prepareuccr in
     ""|"d") if [ ! -d "../uccr/" ];then uccr_prepare $uccr $uccrid;fi ;;
@@ -425,8 +431,8 @@ if [ $known = y ] ;then
   esac
 else
   case "$dplang" in
-    "zh_CN")echo -e "${cCT}警告：指定的 uccr ${cNT}\"$(trycat .tempconf/uccr)\"${cCT} 不在 uccr 列表中，对 uccr 的准备将被忽略。${cNM}";;
-    *)echo -e "${cCT}WARNING: The specified uccr ${cNT}\"$(trycat .tempconf/uccr)\"${cCT} is not in the uccr list, uccr preparation will be ignored.${cNM}";;
+    "zh_CN")echo -e "${cCT}警告：指定的 UCCR ${cNT}\"$(trycat .coreset/uccr)\"${cCT} 不在 UCCR 列表中，对 UCCR 的准备将被忽略。${cNM}";;
+    *)echo -e "${cCT}WARNING: The specified UCCR ${cNT}\"$(trycat .coreset/uccr)\"${cCT} is not in the UCCR list, UCCR preparation will be ignored.${cNM}";;
   esac
   sleep 3
 fi
@@ -440,7 +446,7 @@ fi
 # }}}
 
 # {{{ 完成安装 - Installation finished
-touch ${basedir}/.tempconf/installed
+touch ${basedir}/.coreset/installed
 case "$dplang" in
   "zh_CN") echo -e "${cNT}本次安装已全部完成。${cNM}";;
   "en_US") echo -e "${cNT}The installation process has finished.${cNM}";;

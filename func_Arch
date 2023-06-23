@@ -8,7 +8,7 @@ function nofail { while true;do if "$@";then break;fi;done; }
 function g { nofail git clone --filter=blob:none "$1" ../uccr; }
 function try { "$@" || sleep 0; }
 function trycat { if test -f $1;then cat $1;fi; }
-function catlocale { trycat .tempconf/locale.conf; }
+function catlocale { trycat .coreset/locale; }
 
 function y { nofail yay -S --needed --noconfirm $1; }
 function p { nofail sudo pacman -S --needed --noconfirm $1; }
@@ -19,8 +19,8 @@ function sd { try sudo systemctl disable --now $1; }
 function ud { try systemctl disable --now --user $1; }
 # }}}
 
-# {{{ deps_begin
-deps_begin(){
+# {{{ benv_begin
+benv_begin(){
 ## 确保有 AUR 助手 - Ensure AUR helper available
 if test -f "/usr/bin/yay";
 then echo "/usr/bin/yay found."
@@ -34,9 +34,9 @@ fi
 }
 # }}}
 # TODO：对每个list前面添加一个描述函数
-# {{{ deps_audio
-deps_audio_list=(none pipewire pulseaudio)
-deps_audio(){
+# {{{ benv_audio
+benv_audio_list=(none pipewire pulseaudio)
+benv_audio(){
   case "$1" in
     "none") sleep 0 ;;
     "pipewire") p pipewire pipewire-audio pipewire-alsa pipewire-pulse wireplumber pipewire-jack pipewire-v4l2
@@ -46,19 +46,19 @@ deps_audio(){
     ue pipewire-pulse.service
     ;;
     "pulseaudio") p pulseaudio ;;
-    *) echo -e "ERROR: deps_audio \"$1\" not supported.";;
+    *) echo -e "ERROR: benv_audio \"$1\" not supported.";;
   esac
 }
 # }}}
 
-# {{{ deps_vga
-deps_vga_list=(none generic amd amd-ati nv nv-nouveau nv-old intel-IG)
+# {{{ benv_vga
+benv_vga_list=(none generic amd amd-ati nv nv-nouveau nv-old intel-IG)
 #TODO List:
 #Qemu/KVM/libvirt
 #VirtualBox
 #VMWARE
 # 自动判断并使用 multilib（而不是直接使用）
-deps_vga(){
+benv_vga(){
   case "$1" in
     "none") sleep 0 ;;
     "generic") p mesa
@@ -78,60 +78,60 @@ deps_vga(){
     # Intel
     "intel-IG") p mesa vulkan-intel
     try p lib32-mesa lib32-vulkan-intel ;;
-    *) echo -e "ERROR: deps_vga \"$1\" not supported.";;
+    *) echo -e "ERROR: benv_vga \"$1\" not supported.";;
   esac
 }
 # }}}
 # TODO：禁用冲突服务，如 iwd 等
-# {{{ deps_network
-deps_network_list=(none networkmanager)
-deps_network(){
+# {{{ benv_network
+benv_network_list=(none networkmanager)
+benv_network(){
   case "$1" in
     "none") sleep 0 ;;
     "networkmanager") p networkmanager ;;
-    *) echo -e "ERROR: deps_network \"$1\" not supported.";;
+    *) echo -e "ERROR: benv_network \"$1\" not supported.";;
   esac
 }
 # }}}
 
-# {{{ deps_bluetooth
-deps_bluetooth_list=(none bluez)
-deps_bluetooth(){
+# {{{ benv_bluetooth
+benv_bluetooth_list=(none bluez)
+benv_bluetooth(){
   case "$1" in
     "none") sleep 0 ;;
     "bluez") p bluez bluez-utils ;;
-    *) echo -e "ERROR: deps_bluetooth \"$1\" not supported.";;
+    *) echo -e "ERROR: benv_bluetooth \"$1\" not supported.";;
   esac
 }
 # }}}
 
-# {{{ deps_trackpad
-deps_trackpad_list=(none libinput synaptics)
-deps_trackpad(){
+# {{{ benv_trackpad
+benv_trackpad_list=(none libinput synaptics)
+benv_trackpad(){
   case "$1" in
     "none") sleep 0 ;;
     "libinput") p libinput xf86-input-libinput ;;
     "synaptics") p xf86-input-synaptics ;;
-    *) echo -e "ERROR: deps_trackpad \"$1\" not supported.";;
+    *) echo -e "ERROR: benv_trackpad \"$1\" not supported.";;
   esac
 }
 # }}}
 
-# {{{ deps_touchscr
-deps_touchscr_list=(none libinput evdev elographics)
-deps_touchscr(){
+# {{{ benv_touchscr
+benv_touchscr_list=(none libinput evdev elographics)
+benv_touchscr(){
   case "$1" in
     "none") sleep 0 ;;
     "libinput") p libinput xf86-input-libinput ;;
     "evdev") p xf86-input-evdev;y xinput_calibrator ;;
     "elographics") p xf86-input-elographic ;;
-    *) echo -e "ERROR: deps_touchscr \"$1\" not supported.";;
+    *) echo -e "ERROR: benv_touchscr \"$1\" not supported.";;
   esac
 }
 # }}}
 
-# {{{ deps_end
-deps_end(){
+# {{{ benv_end
+benv_end(){
   sleep 0
 }
 # }}}

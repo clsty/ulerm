@@ -41,7 +41,7 @@ git clone https://github.com/clsty/generic-archsway ~/cr
 And you're done (reboot may be required).
 
 #+begin_quote
-Note: The behavior of this script is that, during the installation for the first time, it will ask you what locale to choose and whether to confirm to overwrite files. It won't ask again each time after the first time, unless you delete =.tempconf= .
+Note: The behavior of this script is that, during the installation for the first time, it will ask you what locale to choose and whether to confirm to overwrite files. It won't ask again each time after the first time, unless you delete =.coreset= .
 #+end_quote
 
 *** Get started
