@@ -6,7 +6,7 @@
 # notice that some of them comes from ./core, will occupy original functions, so that they should keep same as the ones in ./core.
 function nofail { while true;do if "$@";then break;else echo "!! Retrying \"$@\"";sleep 1;fi;done; }
 gitcloneuccr(){
-if ! [ -d ../uccr/.git]
+if ! [ -d ../uccr/.git ]
 then git clone --filter=blob:none "$1" ../uccr
 else cd ../uccr/; git restore --source=HEAD :/ 
 fi
