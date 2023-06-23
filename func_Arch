@@ -4,8 +4,14 @@
 # {{{ 定义基本函数 - Define basic functions
 # 注意这些函数部分来自 ./core，在 source 时会覆盖，所以应与 core 保持统一。
 # notice that some of them comes from ./core, will occupy original functions, so that they should keep same as the ones in ./core.
-function nofail { while true;do if "$@";then break;fi;done; }
-function g { nofail git clone --filter=blob:none "$1" ../uccr; }
+function nofail { while true;do if "$@";then break;else echo "!! Retrying \"$@\"";sleep 1;fi;done; }
+gitcloneuccr(){
+if ! [ -d ../uccr/.git]
+then git clone --filter=blob:none "$1" ../uccr
+else cd ../uccr/; git restore --source=HEAD :/ 
+fi
+}
+function g { nofail gitcloneuccr "$1"; }
 function try { "$@" || sleep 0; }
 function trycat { if test -f $1;then cat $1;fi; }
 function catlocale { trycat .coreset/locale; }
