@@ -416,6 +416,7 @@ done
 if ! test -f ../uccr/uccr-sync;then
   echo "${uccr_list[@]}"| grep -wq "$(trycat .coreset/uccr)" || ask_uccr
 fi
+# TODO 这里的一个问题是，若 ../uccr/uccr-sync 已存在，则 ulerm 会直接认定 uccr 为空，且不在列表中，从而与 uccr“失联”
 # }}}
 
 # {{{ 准备 UCCR - Prepare UCCR
@@ -431,8 +432,8 @@ if [ $known = y ] ;then
   esac
 else
   case "$dplang" in
-    "zh_CN")echo -e "${cCT}警告：指定的 UCCR ${cNT}\"$(trycat .coreset/uccr)\"${cCT} 不在 UCCR 列表中，对 UCCR 的准备将被忽略。${cNM}";;
-    *)echo -e "${cCT}WARNING: The specified UCCR ${cNT}\"$(trycat .coreset/uccr)\"${cCT} is not in the UCCR list, UCCR preparation will be ignored.${cNM}";;
+    "zh_CN")echo -e "${cCT}警告：指定的 UCCR ${cNT}\"$(trycat .coreset/uccr)\"${cCT} 不在 UCCR 列表中，对 UCCR 的准备将被忽略；UCCR 同步则不受影响。${cNM}";;
+    *)echo -e "${cCT}WARNING: The specified UCCR ${cNT}\"$(trycat .coreset/uccr)\"${cCT} is not in the UCCR list, UCCR preparation will be ignored; UCCR sync is not affected though.${cNM}";;
   esac
   sleep 3
 fi
