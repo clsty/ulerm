@@ -2,6 +2,11 @@
 
 *（此项目正在施工中，敬请期待）*
 
+* TODOs
+如果要建立的软链接的父目录是一个失效的软链接，则会被视为文件，导致想在其下创建软链接的操作失败。
+
+可以把这个放在 FAQ 里面，并提供 bash 批量清理失效软链接的脚本。
+
 ** 简介
 此项目非常适合在此基础上进行更多配置，以搭配出自己的工作环境。
 ** 设计思想
@@ -18,14 +23,17 @@ Linux 从安装到配置的完整步骤，可以分为这样几个层次：
 ** 什么是 uccr？
 uccr 即 ulerm 兼容的配置仓库（Ulerm-Compatible Configuration Repo）。
 
-uccr 从技术上来说，必须满足两个条件：
+uccr 从技术上来说，必须满足两个基本条件：
 - 在根目录下提供名为“uccr-sync”的同步脚本。
 - 此同步脚本是幂等的。
 Technically, an uccr must meet 2 requirements:
 - Provide a sync script with filename "uccr-sync".
 - The sync script must be idempotent.
 
-举个例子：dotbot 刚好就符合幂等的特性，因此将使用 dotbot 进行管理的配置仓库转变为 uccr 是非常简单的，例如将 [[https://github.com/Jguer/dotfiles][Jguer/dotfiles]] 转变为 uccr 只需要将 =install= 重名命为 =ulerm-sync= 。
+此外，为了利用上 ulerm 的全部优势，uccr 还应满足：
+
+
+举个例子：dotbot 刚好就符合幂等的特性，因此将使用 dotbot 进行管理的配置仓库转变为 uccr 是非常简单的，例如将 [[https://github.com/Jguer/dotfiles][Jguer/dotfiles]] 转变为 uccr 只需要将 =install= 重名命为 =ulerm-sync= （注意这仅刚好满足 uccr 的基本条件）。
 
 所以，这里有一个问题：为什么不直接使用 dotbot，而是将它变为 uccr 以配合 ulerm 再使用呢？
 换句话说，ulerm 提供了什么额外的好处？

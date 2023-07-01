@@ -37,12 +37,18 @@ basedirname="$(basename $basedir)"
 mkdir -p .coreset
 
 # 判断发行版 id - Determine Linux Distro id
-if ! [ -n "${distro_id}" ];then distro_id="$(./lsb_release -is)";fi
+# Note: it has been tested that both /usr/bin/lsb_release and /etc/lsb-release does not exists on Arch Linux (also maybe other distros) by default
+find_distro_id(){
+# borrowed from https://unix.stackexchange.com/a/128470 , answered by scrutari
+for f in $(find /etc -type f -maxdepth 1 \( ! -wholename /etc/os-release ! -wholename /etc/lsb-release -wholename /etc/\*release -o -wholename /etc/\*version \) 2> /dev/null); do echo ${f:5:${#f}-13}; done;
+}
+if ! [ -n "${distro_id}" ];then distro_id="$(find_distro_id)";fi
 case "$distro_id" in
-  "Arch") source ./func_Arch;;
+  "arch") source ./func_Arch;;
   #"Fedora") source ./func_Fedora;;
   *) echo -e "${cCT}ERROR: distro \"${distro_id}\" not supported.${cNM}";exit 1;;
 esac
+echo "$distro_id">.coreset/distro_id
 # }}}
 
 # {{{ 确保就位 - Ensure in position
